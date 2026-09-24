@@ -86,6 +86,7 @@ export default function ConferenceRoom({ room, isRecorder = false }: ConferenceR
   }
   const [duration, setDuration] = useState(0);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [showViewerNotice, setShowViewerNotice] = useState(true);
   // Keeps the sidebar mounted briefly after close so it can slide out.
   const [renderedSidebar, setRenderedSidebar] = useState<typeof activeSidebar>(null);
   const isPanelClosing = !activeSidebar && !!renderedSidebar;
@@ -109,6 +110,12 @@ export default function ConferenceRoom({ room, isRecorder = false }: ConferenceR
     }, 1000);
     return () => clearInterval(interval);
   }, []);
+  // Auto-hide viewer notice after 5 seconds
+  useEffect(() => {
+    if (!showViewerNotice) return;
+    const timer = setTimeout(() => setShowViewerNotice(false), 5000);
+    return () => clearTimeout(timer);
+  }, [showViewerNotice]);
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -396,7 +403,7 @@ export default function ConferenceRoom({ room, isRecorder = false }: ConferenceR
       </footer>
 
       {/* Attendee notice: publishing is denied by the meeting token */}
-      {!canUseMicrophone && !canUseCamera && !canShareScreen && (
+      {showViewerNotice && !canUseMicrophone && !canUseCamera && !canShareScreen && (
         <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20 px-4 py-2 rounded-full border border-md-outline-variant/60 text-[11px] text-md-on-surface-variant flex items-center gap-2 animate-fade-in-up">
           <MicOff className="w-3.5 h-3.5 text-md-primary" />
           <span>
