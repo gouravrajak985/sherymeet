@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { Room, Participant, Track } from "livekit-client";
 import { toast } from "sonner";
+import { MicOff, Mic, UserPlus, UserMinus, Loader2 } from "lucide-react";
 import { useMeetingStore } from "@/store/useMeetingStore";
 import { ParticipantRole } from "@/types/roles";
 import {
@@ -105,40 +106,51 @@ export default function ParticipantModerationControls({
     toast.success(onPanel ? "Moved to audience" : "Added to panel");
   }
 
+  const iconBtnClass =
+    "w-6 h-6 rounded-md flex items-center justify-center transition-colors disabled:opacity-40";
+
   return (
-    <div className="flex flex-wrap gap-2 mt-2">
-      <button
-        type="button"
-        disabled={pending}
-        className="text-xs px-2 py-1 rounded border border-md-outline-variant disabled:opacity-40"
-        onClick={() => void run(requestUnmute)}
-      >
-        Ask to unmute
-      </button>
-      {!muted && (
-        <button
-          type="button"
-          disabled={pending}
-          className="text-xs px-2 py-1 rounded border border-md-outline-variant disabled:opacity-40"
-          onClick={() => void run(mute)}
-        >
-          Mute
-        </button>
-      )}
-      {webinar && !isCoHostOrAbove(participant) && (
-        <button
-          type="button"
-          disabled={pending}
-          className="text-xs px-2 py-1 rounded border border-md-outline-variant disabled:opacity-40"
-          onClick={() => void run(changePanel)}
-        >
-          {onPanel ? "Remove from panel" : "Add to panel"}
-        </button>
-      )}
-      {pending && (
-        <span role="status" className="text-xs">
-          Updating...
-        </span>
+    <div className="flex items-center gap-1 flex-shrink-0">
+      {pending ? (
+        <Loader2 className="w-3.5 h-3.5 text-md-on-surface-variant animate-spin" />
+      ) : (
+        <>
+          <button
+            type="button"
+            disabled={pending}
+            className={`${iconBtnClass} bg-md-surface-variant/50 hover:bg-md-primary/20 text-md-on-surface-variant hover:text-md-primary`}
+            onClick={() => void run(requestUnmute)}
+            title="Ask to unmute"
+          >
+            <Mic className="w-3 h-3" />
+          </button>
+          {!muted && (
+            <button
+              type="button"
+              disabled={pending}
+              className={`${iconBtnClass} bg-md-error/10 hover:bg-md-error/20 text-md-error`}
+              onClick={() => void run(mute)}
+              title="Mute"
+            >
+              <MicOff className="w-3 h-3" />
+            </button>
+          )}
+          {webinar && !isCoHostOrAbove(participant) && (
+            <button
+              type="button"
+              disabled={pending}
+              className={`${iconBtnClass} ${
+                onPanel
+                  ? "bg-md-error/10 hover:bg-md-error/20 text-md-error"
+                  : "bg-md-tertiary/10 hover:bg-md-tertiary/20 text-md-tertiary"
+              }`}
+              onClick={() => void run(changePanel)}
+              title={onPanel ? "Remove from panel" : "Add to panel"}
+            >
+              {onPanel ? <UserMinus className="w-3 h-3" /> : <UserPlus className="w-3 h-3" />}
+            </button>
+          )}
+        </>
       )}
     </div>
   );
