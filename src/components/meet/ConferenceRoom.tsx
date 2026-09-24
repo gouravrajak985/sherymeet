@@ -141,8 +141,9 @@ export default function ConferenceRoom({ room, isRecorder = false }: ConferenceR
   const stageParticipants = isWebinar
     ? remoteParticipants.filter(isPanelParticipant)
     : remoteParticipants;
+  // Recorder is a hidden subscribe-only bot - don't show its tile
   const stageLocalParticipant =
-    isWebinar && !isPanelParticipant(localParticipant) ? null : localParticipant;
+    isRecorder || (isWebinar && !isPanelParticipant(localParticipant)) ? null : localParticipant;
   const audienceAudio = isWebinar
     ? remoteParticipants
         .filter((participant) => !isPanelParticipant(participant))

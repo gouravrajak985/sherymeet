@@ -23,6 +23,8 @@ const envSchema = z.object({
   AWS_ACCESS_KEY_ID: z.string().optional(),
   LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).optional(),
   LOG_FORMAT: z.enum(["json", "pretty"]).optional(),
+  // URL the egress agent will use to load the recorder view (may differ from NEXT_PUBLIC_API_URL if egress runs in a different network)
+  RECORDING_BASE_URL: z.string().optional(),
 });
 
 function collectRawEnv() {
@@ -48,6 +50,7 @@ function collectRawEnv() {
     AWS_TRANSCRIBE_REGION: process.env.AWS_TRANSCRIBE_REGION,
     AWS_S3_BUCKET_NAME: process.env.AWS_S3_BUCKET_NAME,
     AWS_S3_REGION: process.env.AWS_S3_REGION,
+    RECORDING_BASE_URL: process.env.RECORDING_BASE_URL,
   };
 }
 

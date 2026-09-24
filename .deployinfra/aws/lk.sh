@@ -236,7 +236,7 @@ write_files:
       webhook:
           api_key: ${LIVEKIT_API_KEY}
           urls:
-              - https://${LIVEKIT_WEBHOOK_DOMAIN}/webhook
+              - https://${LIVEKIT_WEBHOOK_DOMAIN}/api/webhooks/livekit
 
 
   - path: /opt/livekit/caddy.yaml
