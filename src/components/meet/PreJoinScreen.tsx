@@ -5,6 +5,7 @@ import { useLocalMedia } from "@/hooks/media-server/useLocalMedia";
 import { useMeetingStore } from "@/store/useMeetingStore";
 import { toast } from "sonner";
 import { Video, VideoOff, Mic, MicOff, User, ArrowRight, ChevronDown, Loader2 } from "lucide-react";
+import { getAvatarUrl } from "@/lib/avatar";
 
 interface PreJoinScreenProps {
   roomId: string;
@@ -107,7 +108,7 @@ export default function PreJoinScreen({ roomId, onJoin, userName }: PreJoinScree
     onJoin(inputName.trim());
   };
 
-  const initial = (inputName || userName || "You").trim().charAt(0).toUpperCase();
+  const avatarSeed = (inputName || userName || "You").trim();
 
   const selectClass =
     "w-full appearance-none rounded-md-md bg-md-surface-container border border-md-outline-variant " +
@@ -144,8 +145,12 @@ export default function PreJoinScreen({ roomId, onJoin, userName }: PreJoinScree
                   }`}
                 />
               ) : (
-                <div className="w-[128px] h-[128px] rounded-full bg-md-primary text-md-on-primary flex items-center justify-center">
-                  <span className="font-display text-5xl font-bold leading-none">{initial}</span>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <img
+                    src={getAvatarUrl(avatarSeed, undefined)}
+                    alt="Your avatar"
+                    className="w-[128px] h-[128px] rounded-full bg-md-surface-container"
+                  />
                 </div>
               )}
 

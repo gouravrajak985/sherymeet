@@ -1,9 +1,19 @@
-'use client';
+"use client";
 
-import React, { useEffect, useRef, useState } from 'react';
-import { Participant, Track, ParticipantEvent } from 'livekit-client';
-import { Mic, MicOff, VideoOff, Hand, SignalHigh, SignalMedium, SignalLow, Pin } from 'lucide-react';
-import { useMeetingStore } from '@/store/useMeetingStore';
+import React, { useEffect, useRef, useState } from "react";
+import { Participant, Track, ParticipantEvent } from "livekit-client";
+import {
+  Mic,
+  MicOff,
+  VideoOff,
+  Hand,
+  SignalHigh,
+  SignalMedium,
+  SignalLow,
+  Pin,
+} from "lucide-react";
+import { useMeetingStore } from "@/store/useMeetingStore";
+import { getAvatarUrl } from "@/lib/avatar";
 
 interface ParticipantTileProps {
   participant: Participant;
@@ -18,7 +28,7 @@ interface ParticipantTileProps {
 export default function ParticipantTile({
   participant,
   isLocal,
-  className = '',
+  className = "",
   isSpeaker = false,
   isVirtual = false,
   pinned = false,
@@ -31,7 +41,7 @@ export default function ParticipantTile({
   const [audioTrack, setAudioTrack] = useState<Track | null>(null);
   const [isAudioMuted, setIsAudioMuted] = useState(!participant.isMicrophoneEnabled);
   const [isVideoMuted, setIsVideoMuted] = useState(!participant.isCameraEnabled);
-  
+
   const raisedHands = useMeetingStore((state) => state.raisedHands);
   const isHandRaised = raisedHands.includes(participant.identity);
 
@@ -99,9 +109,9 @@ export default function ParticipantTile({
 
     const handleLive = () => setIsVideoLive(true);
     const handleDead = () => setIsVideoLive(false);
-    el.addEventListener('loadeddata', handleLive);
-    el.addEventListener('playing', handleLive);
-    el.addEventListener('emptied', handleDead);
+    el.addEventListener("loadeddata", handleLive);
+    el.addEventListener("playing", handleLive);
+    el.addEventListener("emptied", handleDead);
 
     videoTrack.attach(el);
     // If the element already has a decoded frame (e.g. re-mount of a live
@@ -112,9 +122,9 @@ export default function ParticipantTile({
 
     return () => {
       cancelAnimationFrame(raf);
-      el.removeEventListener('loadeddata', handleLive);
-      el.removeEventListener('playing', handleLive);
-      el.removeEventListener('emptied', handleDead);
+      el.removeEventListener("loadeddata", handleLive);
+      el.removeEventListener("playing", handleLive);
+      el.removeEventListener("emptied", handleDead);
       videoTrack.detach(el);
     };
   }, [videoTrack, isVirtual]);
@@ -141,11 +151,11 @@ export default function ParticipantTile({
   // Signal indicator helper
   const renderConnectionQuality = () => {
     const quality = participant.connectionQuality;
-    const size = 'w-4 h-4';
-    if (quality === 'excellent' || quality === 'good') {
+    const size = "w-4 h-4";
+    if (quality === "excellent" || quality === "good") {
       return <SignalHigh className={`${size} text-green-500`} />;
     }
-    if (quality === 'poor') {
+    if (quality === "poor") {
       return <SignalLow className={`${size} text-md-error`} />;
     }
     return <SignalMedium className={`${size} text-yellow-500`} />;
@@ -155,7 +165,7 @@ export default function ParticipantTile({
     <div
       onDoubleClick={onPinToggle}
       className={`group relative w-full h-full bg-md-surface-container rounded-2xl overflow-hidden border-2 transition-all duration-300 ${
-        isSpeaker ? 'border-md-primary' : 'border-md-outline-variant'
+        isSpeaker ? "border-md-primary" : "border-md-outline-variant"
       } ${className}`}
     >
       {/* Video element */}
@@ -165,16 +175,18 @@ export default function ParticipantTile({
         playsInline
         muted={isLocal}
         className={`w-full h-full object-cover rounded-2xl ${
-          isLocal ? 'transform -scale-x-100' : ''
-        } ${videoMuted || !videoTrack || !isVideoLive || isVirtual ? 'hidden' : ''}`}
+          isLocal ? "transform -scale-x-100" : ""
+        } ${videoMuted || !videoTrack || !isVideoLive || isVirtual ? "hidden" : ""}`}
       />
 
       {/* Avatar placeholder (camera off, or warming up before first frame) */}
       {(videoMuted || !videoTrack || !isVideoLive || isVirtual) && (
-        <div className="w-full h-full flex flex-col items-center justify-center bg-black/40 absolute inset-0">
-          <div className="w-20 h-20 rounded-full bg-md-primary/15 border border-md-primary/30 flex items-center justify-center text-md-primary font-bold text-3xl">
-            {(participant.name || participant.identity || 'P').charAt(0).toUpperCase()}
-          </div>
+        <div className="w-full h-full flex flex-col items-center justify-center bg-md-surface-container/80 absolute inset-0">
+          <img
+            src={getAvatarUrl(participant.name, participant.identity)}
+            alt={participant.name || participant.identity || "Participant"}
+            className="w-20 h-20 rounded-full"
+          />
           {isVirtual && (
             <span className="text-[10px] text-md-on-surface-variant mt-2">
               (Stream virtualized)
@@ -198,7 +210,9 @@ export default function ParticipantTile({
         <div className="bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/5 flex items-center gap-2 pointer-events-auto">
           <span className="text-xs font-semibold text-md-on-surface">
             {participant.name || participant.identity}
-            {isLocal && <span className="text-md-primary ml-1 text-[10px] font-bold uppercase">(You)</span>}
+            {isLocal && (
+              <span className="text-md-primary ml-1 text-[10px] font-bold uppercase">(You)</span>
+            )}
           </span>
           {renderConnectionQuality()}
         </div>
@@ -233,12 +247,18 @@ export default function ParticipantTile({
 
       {/* Bottom status indicators */}
       <div className="absolute bottom-4 right-4 flex items-center gap-2">
-        <div className={`p-2 rounded-full backdrop-blur-md border transition-colors duration-150 ${
-          audioMuted
-            ? 'bg-md-error-container border-md-error/40 text-md-on-error-container'
-            : 'bg-black/60 border-white/5 text-md-on-surface'
-        }`}>
-          {audioMuted ? <MicOff className="w-3.5 h-3.5 animate-pop-in" /> : <Mic className="w-3.5 h-3.5 animate-pop-in" />}
+        <div
+          className={`p-2 rounded-full backdrop-blur-md border transition-colors duration-150 ${
+            audioMuted
+              ? "bg-md-error-container border-md-error/40 text-md-on-error-container"
+              : "bg-black/60 border-white/5 text-md-on-surface"
+          }`}
+        >
+          {audioMuted ? (
+            <MicOff className="w-3.5 h-3.5 animate-pop-in" />
+          ) : (
+            <Mic className="w-3.5 h-3.5 animate-pop-in" />
+          )}
         </div>
         {videoMuted && (
           <div className="p-2 rounded-full backdrop-blur-md border bg-md-error-container border-md-error/40 text-md-on-error-container animate-pop-in">

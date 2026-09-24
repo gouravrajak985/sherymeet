@@ -13,56 +13,56 @@
 
 @theme {
   /* Zoom-inspired dark theme palette.
-     Professional, clean appearance with signature Zoom blue.
+     Authentic Zoom colors for professional video conferencing.
      Maintains M3 role structure for consistent component styling. */
 
-  /* --- Primary (Zoom Blue) --- */
-  --color-md-primary: #0b5cff;
-  /* Slightly lighter for hover states */
-  --color-md-primary-hover: #2d7aff;
+  /* --- Primary (Zoom Blue #2D8CFF) --- */
+  --color-md-primary: #2d8cff;
+  /* Lighter for hover states */
+  --color-md-primary-hover: #4da3ff;
   --color-md-on-primary: #ffffff;
-  --color-md-primary-container: #0043b8;
-  --color-md-on-primary-container: #d6e3ff;
+  --color-md-primary-container: #0d5fbf;
+  --color-md-on-primary-container: #d6e9ff;
 
-  /* --- Secondary (Neutral blue-gray) --- */
-  --color-md-secondary: #9ca3af;
-  --color-md-on-secondary: #1f2937;
-  --color-md-secondary-container: #374151;
-  --color-md-on-secondary-container: #e5e7eb;
+  /* --- Secondary (Zoom gray tones) --- */
+  --color-md-secondary: #8a8a8a;
+  --color-md-on-secondary: #1a1a1a;
+  --color-md-secondary-container: #3d3d3d;
+  --color-md-on-secondary-container: #e8e8e8;
 
-  /* --- Tertiary (Success green for connected states) --- */
-  --color-md-tertiary: #22c55e;
-  --color-md-on-tertiary: #052e16;
-  --color-md-tertiary-container: #166534;
-  --color-md-on-tertiary-container: #bbf7d0;
+  /* --- Tertiary (Zoom green for active/connected) --- */
+  --color-md-tertiary: #2cce55;
+  --color-md-on-tertiary: #003d12;
+  --color-md-tertiary-container: #1a7f35;
+  --color-md-on-tertiary-container: #b8f5c8;
 
-  /* --- Error (Zoom red) --- */
-  --color-md-error: #f87171;
-  --color-md-on-error: #450a0a;
-  --color-md-error-container: #dc2626;
-  --color-md-on-error-container: #fee2e2;
+  /* --- Error (Zoom red for end/mute) --- */
+  --color-md-error: #e02828;
+  --color-md-on-error: #ffffff;
+  --color-md-error-container: #5c1111;
+  --color-md-on-error-container: #ffcfcf;
 
-  /* --- Surfaces (Zoom's charcoal/dark gray palette) --- */
-  --color-md-surface: #0f0f0f;
+  /* --- Surfaces (Zoom's signature dark gray #242424) --- */
+  --color-md-surface: #1a1a1a;
   --color-md-on-surface: #ffffff;
-  --color-md-surface-variant: #3f3f46;
-  --color-md-on-surface-variant: #a1a1aa;
-  --color-md-surface-dim: #0a0a0a;
-  --color-md-surface-bright: #3f3f46;
+  --color-md-surface-variant: #404040;
+  --color-md-on-surface-variant: #b3b3b3;
+  --color-md-surface-dim: #141414;
+  --color-md-surface-bright: #4a4a4a;
 
-  /* Surface containers for elevation hierarchy */
-  --color-md-surface-container-lowest: #09090b;
-  --color-md-surface-container-low: #18181b;
-  --color-md-surface-container: #1f1f23;
-  --color-md-surface-container-high: #27272a;
-  --color-md-surface-container-highest: #323238;
+  /* Surface containers - Zoom's layered grays */
+  --color-md-surface-container-lowest: #121212;
+  --color-md-surface-container-low: #1e1e1e;
+  --color-md-surface-container: #242424;
+  --color-md-surface-container-high: #2d2d2d;
+  --color-md-surface-container-highest: #383838;
 
   /* --- Outlines & utility --- */
-  --color-md-outline: #71717a;
-  --color-md-outline-variant: #3f3f46;
-  --color-md-inverse-surface: #fafafa;
-  --color-md-inverse-on-surface: #18181b;
-  --color-md-inverse-primary: #0b5cff;
+  --color-md-outline: #666666;
+  --color-md-outline-variant: #404040;
+  --color-md-inverse-surface: #f5f5f5;
+  --color-md-inverse-on-surface: #1a1a1a;
+  --color-md-inverse-primary: #2d8cff;
   --color-md-scrim: #000000;
 
   /* --- Type families --- */
