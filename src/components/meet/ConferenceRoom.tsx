@@ -116,6 +116,13 @@ export default function ConferenceRoom({ room, isRecorder = false }: ConferenceR
     const timer = setTimeout(() => setShowViewerNotice(false), 5000);
     return () => clearTimeout(timer);
   }, [showViewerNotice]);
+  // Signal LiveKit egress that the recorder page is ready
+  useEffect(() => {
+    if (isRecorder && room.state === ConnectionState.Connected) {
+      // LiveKit egress waits for this console message before starting to record
+      console.log("START_RECORDING");
+    }
+  }, [isRecorder, room.state]);
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;

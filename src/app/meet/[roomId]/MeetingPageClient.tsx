@@ -127,6 +127,7 @@ export default function MeetingPageClient({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ roomId, token: tokenToVerify, password: password || undefined }),
       });
+      console.log({ res, tokenToVerify, password, roomId });
       const result = await res.json();
       if (!result.success) {
         setGateMessage(result.message || "This meeting link is no longer valid.");
@@ -239,6 +240,7 @@ export default function MeetingPageClient({
 
       setActiveToken(resolvedToken);
       verifyParamsRef.current = { token: resolvedToken, password: resolvedPassword };
+
       verifyToken();
     }, 0);
 
@@ -246,7 +248,7 @@ export default function MeetingPageClient({
       clearTimeout(timer);
       resetMeetingStore();
     };
-  }, [resetMeetingStore, token, setUsername, setEmail, verifyToken]);
+  }, [resetMeetingStore, token, setUsername, setEmail, verifyToken, isRecorder]);
 
   const handleJoin = useCallback(async () => {
     setConnectionStatus(true, false, null);
@@ -464,6 +466,16 @@ export default function MeetingPageClient({
     if (isConnected && room) {
       return <ConferenceRoom room={room} isRecorder={isRecorder} />;
     }
+  }
+
+  // Recorder shows loading state while auto-joining (no preview screen)
+  if (isRecorder) {
+    return (
+      <div className="min-h-screen bg-md-surface flex flex-col items-center justify-center text-center">
+        <Loader2 className="w-12 h-12 text-md-primary animate-spin mb-4" />
+        <p className="text-md-on-surface-variant text-sm">Initializing recording...</p>
+      </div>
+    );
   }
 
   // Render the pre-join preview screen by default

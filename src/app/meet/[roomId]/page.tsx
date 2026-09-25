@@ -8,7 +8,7 @@ interface Params {
 
 interface SearchParams {
   token?: string;
-  recorder?: boolean;
+  recorder?: string;
 }
 
 export const metadata: Metadata = {
@@ -25,6 +25,6 @@ export default async function MeetingPage({
 }) {
   const { roomId } = await params;
   const { token, recorder } = await searchParams;
-
-  return <MeetingPageClient roomId={roomId} token={token || ""} isRecorder={recorder} />;
+  console.log({ roomId, token, recorder });
+  return <MeetingPageClient roomId={roomId} token={token || ""} isRecorder={recorder === "true"} />;
 }

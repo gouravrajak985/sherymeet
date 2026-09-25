@@ -10,15 +10,14 @@ import {
 import { config } from "../../utils/config";
 import { logger } from "@/server/utils/logger";
 import { ApiError } from "@/server/utils/api-helper";
-
-async function generateRecorderToken(roomName: string): Promise<string> {
+async function generateRecorderToken(roomId: string): Promise<string> {
   const at = new AccessToken(config.LIVEKIT_API_KEY, config.LIVEKIT_API_SECRET, {
-    identity: `recorder-${roomName}`,
+    identity: `recorder-${roomId}`,
     name: "Recording Bot",
     ttl: "24h",
   });
   at.addGrant({
-    room: roomName,
+    room: roomId,
     roomJoin: true,
     canPublish: false,
     canSubscribe: true,
@@ -30,7 +29,7 @@ async function generateRecorderToken(roomName: string): Promise<string> {
 }
 
 export async function startRoomRecording(
-  roomName: string,
+  roomId: string,
   filepath: string,
 ): Promise<EgressInfo | null> {
   const host = config.LIVEKIT_URL.replace("wss://", "https://").replace("ws://", "http://");
@@ -45,11 +44,11 @@ export async function startRoomRecording(
   }
 
   // Generate a recorder token for the custom web page
-  const recorderToken = await generateRecorderToken(roomName);
+  const recorderToken = await generateRecorderToken(roomId);
   const baseUrl = config.RECORDING_BASE_URL || config.NEXT_PUBLIC_API_URL;
-  const recordingUrl = `${baseUrl}/meet/${roomName}?recorder=true&token=${recorderToken}`;
+  const recordingUrl = `${baseUrl}/meet/${roomId}?recorder=true&token=${recorderToken}`;
 
-  logger.info(`Starting web egress for room ${roomName}`, { recordingUrl: recordingUrl });
+  logger.info(`Starting web egress for room ${roomId}`, { recordingUrl: recordingUrl });
 
   // Use web egress to record the custom recorder view
   const egressInfo = await client.startWebEgress(
@@ -74,6 +73,8 @@ export async function startRoomRecording(
         videoBitrate: 6000,
         audioBitrate: 256,
       }),
+      // Wait for the page to signal it's ready before recording
+      awaitStartSignal: true,
     },
   );
   return egressInfo;
