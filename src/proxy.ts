@@ -21,38 +21,56 @@ function forbidden(reason: string): NextResponse {
 }
 
 export function proxy(request: NextRequest) {
-  // Layer 1: fetch metadata. Browsers always send this; anything other than
-  // a same-origin call is rejected outright.
-  const secFetchSite = request.headers.get("sec-fetch-site");
-  if (secFetchSite && secFetchSite !== "same-origin") {
-    return forbidden("cross-origin requests are not allowed");
+  // In development, skip all origin checks to allow egress testing from external domains
+  if (appConfig.NODE_ENV === "development") {
+    return NextResponse.next();
   }
+
+  // Layer 1: fetch metadata. Browsers always send this; anything other than
+  // a same-origin call is rejected outright (unless it's from the recording origin).
+  const secFetchSite = request.headers.get("sec-fetch-site");
 
   // Layer 2: Origin/Referer allowlist.
   const allowedOrigin = appConfig.NEXT_PUBLIC_API_URL;
   if (!allowedOrigin) {
-    return NextResponse.json(
-      { error: "Server configuration error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
   }
 
   let expectedOrigin: string;
   try {
     expectedOrigin = new URL(allowedOrigin).origin;
   } catch {
-    return NextResponse.json(
-      { error: "Server configuration error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
+  }
+
+  // Build allowed origins list (main app + recording URL if configured)
+  const allowedOrigins = [expectedOrigin];
+  if (appConfig.RECORDING_BASE_URL) {
+    try {
+      const recordingOrigin = new URL(appConfig.RECORDING_BASE_URL).origin;
+      if (!allowedOrigins.includes(recordingOrigin)) {
+        allowedOrigins.push(recordingOrigin);
+      }
+    } catch {
+      // Invalid RECORDING_BASE_URL, ignore
+    }
   }
 
   const origin = request.headers.get("origin");
   const referer = request.headers.get("referer");
 
+  // Check if request is from an allowed origin
+  const requestOrigin = origin || (referer ? new URL(referer).origin : null);
+  const isAllowedOrigin = requestOrigin && allowedOrigins.includes(requestOrigin);
+
+  // For cross-origin requests, only allow if from recording origin
+  if (secFetchSite && secFetchSite !== "same-origin" && !isAllowedOrigin) {
+    return forbidden("cross-origin requests are not allowed");
+  }
+
   if (origin) {
     try {
-      if (new URL(origin).origin !== expectedOrigin) {
+      if (!allowedOrigins.includes(new URL(origin).origin)) {
         return forbidden("origin mismatch");
       }
     } catch {
@@ -60,7 +78,7 @@ export function proxy(request: NextRequest) {
     }
   } else if (referer) {
     try {
-      if (new URL(referer).origin !== expectedOrigin) {
+      if (!allowedOrigins.includes(new URL(referer).origin)) {
         return forbidden("referer mismatch");
       }
     } catch {
