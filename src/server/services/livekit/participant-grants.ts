@@ -9,23 +9,7 @@ export function participantGrants(
   role: ParticipantRole,
   webinar: boolean,
   microphoneAllowed = false,
-  recorder = false,
 ): VideoGrant {
-  // Recorder is a hidden, subscribe-only bot
-  if (recorder) {
-    return {
-      room: roomId,
-      roomJoin: true,
-      roomAdmin: false,
-      canPublish: false,
-      canSubscribe: true,
-      canPublishData: false,
-      canUpdateOwnMetadata: false,
-      hidden: true,
-      recorder: true,
-    };
-  }
-
   const admin = isAdminRole(role);
   const panelist = role === ParticipantRole.PANELIST;
   return {

@@ -15,7 +15,6 @@ import { extractUserFromToken } from "@/lib/token-utils";
 interface MeetingPageClientProps {
   roomId: string;
   token: string;
-  isRecorder?: boolean;
 }
 
 export enum GateStatus {
@@ -85,11 +84,7 @@ function GateScreen({
   );
 }
 
-export default function MeetingPageClient({
-  roomId,
-  token,
-  isRecorder = false,
-}: MeetingPageClientProps) {
+export default function MeetingPageClient({ roomId, token }: MeetingPageClientProps) {
   const {
     username,
     isConnected,
@@ -209,6 +204,7 @@ export default function MeetingPageClient({
   // Reset the meeting store state, extract token from prop or hash, and extract user info from token
   useEffect(() => {
     resetMeetingStore();
+
     let resolvedToken = token || "";
     let resolvedPassword = "";
 
@@ -248,7 +244,7 @@ export default function MeetingPageClient({
       clearTimeout(timer);
       resetMeetingStore();
     };
-  }, [resetMeetingStore, token, setUsername, setEmail, verifyToken, isRecorder]);
+  }, [resetMeetingStore, token, setUsername, setEmail, verifyToken]);
 
   const handleJoin = useCallback(async () => {
     setConnectionStatus(true, false, null);
@@ -286,15 +282,6 @@ export default function MeetingPageClient({
       toast.error("Could not verify meeting access. Please try again.");
     }
   }, [activeToken, roomId, setConnectionStatus, setMeetingInfo]);
-
-  useEffect(() => {
-    if (isRecorder && gateStatus === GateStatus.READY && activeToken && !hasEntered) {
-      const timer = setTimeout(() => {
-        handleJoin();
-      }, 0);
-      return () => clearTimeout(timer);
-    }
-  }, [isRecorder, gateStatus, activeToken, hasEntered, handleJoin]);
 
   const room = useRoomConnection({
     serverUrl,
@@ -464,18 +451,8 @@ export default function MeetingPageClient({
     }
 
     if (isConnected && room) {
-      return <ConferenceRoom room={room} isRecorder={isRecorder} />;
+      return <ConferenceRoom room={room} />;
     }
-  }
-
-  // Recorder shows loading state while auto-joining (no preview screen)
-  if (isRecorder) {
-    return (
-      <div className="min-h-screen bg-md-surface flex flex-col items-center justify-center text-center">
-        <Loader2 className="w-12 h-12 text-md-primary animate-spin mb-4" />
-        <p className="text-md-on-surface-variant text-sm">Initializing recording...</p>
-      </div>
-    );
   }
 
   // Render the pre-join preview screen by default

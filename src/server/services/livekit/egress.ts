@@ -5,28 +5,10 @@ import {
   EncodingOptions,
   EgressInfo,
   EgressStatus,
-  AccessToken,
 } from "livekit-server-sdk";
 import { config } from "../../utils/config";
 import { logger } from "@/server/utils/logger";
 import { ApiError } from "@/server/utils/api-helper";
-async function generateRecorderToken(roomId: string): Promise<string> {
-  const at = new AccessToken(config.LIVEKIT_API_KEY, config.LIVEKIT_API_SECRET, {
-    identity: `recorder-${roomId}`,
-    name: "Recording Bot",
-    ttl: "24h",
-  });
-  at.addGrant({
-    room: roomId,
-    roomJoin: true,
-    canPublish: false,
-    canSubscribe: true,
-    canPublishData: false,
-    hidden: true,
-    recorder: true,
-  });
-  return await at.toJwt();
-}
 
 export async function startRoomRecording(
   roomId: string,
@@ -43,16 +25,12 @@ export async function startRoomRecording(
     return null;
   }
 
-  // Generate a recorder token for the custom web page
-  const recorderToken = await generateRecorderToken(roomId);
-  const baseUrl = config.RECORDING_BASE_URL || config.NEXT_PUBLIC_API_URL;
-  const recordingUrl = `${baseUrl}/meet/${roomId}?recorder=true&token=${recorderToken}`;
+  logger.info(`Starting room composite egress for room ${roomId} with default template`);
 
-  logger.info(`Starting web egress for room ${roomId}`, { recordingUrl: recordingUrl });
-
-  // Use web egress to record the custom recorder view
-  const egressInfo = await client.startWebEgress(
-    recordingUrl,
+  // Use RoomCompositeEgress with LiveKit's built-in default template
+  // Available layouts: "grid", "speaker", "single-speaker" (add "-light" suffix for white background)
+  const egressInfo = await client.startRoomCompositeEgress(
+    roomId,
     new EncodedFileOutput({
       filepath: filepath,
       output: {
@@ -66,6 +44,7 @@ export async function startRoomRecording(
       },
     }),
     {
+      layout: "speaker", // Use speaker layout - shows active speaker prominently
       encodingOptions: new EncodingOptions({
         width: 1920,
         height: 1080,
@@ -73,8 +52,6 @@ export async function startRoomRecording(
         videoBitrate: 6000,
         audioBitrate: 256,
       }),
-      // Wait for the page to signal it's ready before recording
-      awaitStartSignal: true,
     },
   );
   return egressInfo;

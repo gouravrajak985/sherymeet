@@ -46,10 +46,9 @@ import LayoutManager from "./layout/LayoutManager";
 
 interface ConferenceRoomProps {
   room: Room;
-  isRecorder?: boolean;
 }
 
-export default function ConferenceRoom({ room, isRecorder = false }: ConferenceRoomProps) {
+export default function ConferenceRoom({ room }: ConferenceRoomProps) {
   const router = useRouter();
   const {
     roomId,
@@ -116,13 +115,7 @@ export default function ConferenceRoom({ room, isRecorder = false }: ConferenceR
     const timer = setTimeout(() => setShowViewerNotice(false), 5000);
     return () => clearTimeout(timer);
   }, [showViewerNotice]);
-  // Signal LiveKit egress that the recorder page is ready
-  useEffect(() => {
-    if (isRecorder && room.state === ConnectionState.Connected) {
-      // LiveKit egress waits for this console message before starting to record
-      console.log("START_RECORDING");
-    }
-  }, [isRecorder, room.state]);
+
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -148,9 +141,8 @@ export default function ConferenceRoom({ room, isRecorder = false }: ConferenceR
   const stageParticipants = isWebinar
     ? remoteParticipants.filter(isPanelParticipant)
     : remoteParticipants;
-  // Recorder is a hidden subscribe-only bot - don't show its tile
   const stageLocalParticipant =
-    isRecorder || (isWebinar && !isPanelParticipant(localParticipant)) ? null : localParticipant;
+    isWebinar && !isPanelParticipant(localParticipant) ? null : localParticipant;
   const audienceAudio = isWebinar
     ? remoteParticipants
         .filter((participant) => !isPanelParticipant(participant))
@@ -200,27 +192,6 @@ export default function ConferenceRoom({ room, isRecorder = false }: ConferenceR
       }
     }
   };
-
-  if (isRecorder) {
-    return (
-      <div className="h-screen w-screen bg-md-surface text-md-on-surface overflow-hidden relative font-sans">
-        {audienceAudio}
-        <ReactionOverlay reactions={reactions} />
-        <div className="w-full h-full flex overflow-hidden relative">
-          <div className="flex-1 flex flex-col overflow-hidden relative">
-            <LayoutManager
-              updateKey={updateKey}
-              localParticipant={stageLocalParticipant}
-              remoteParticipants={stageParticipants}
-              activeSpeaker={activeSpeaker}
-              emptyMessage={isWebinar ? "Waiting for the host to start presenting" : undefined}
-            />
-            <CaptionOverlay room={room} />
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="h-screen w-screen flex flex-col justify-between bg-md-surface text-md-on-surface overflow-hidden relative font-sans animate-screen-in">

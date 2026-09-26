@@ -79,9 +79,10 @@ export function useRoomConnection({ serverUrl, token }: UseRoomConnectionOptions
       try {
         console.log("Calling r.connect(serverUrl, token)...", {
           serverUrl,
+          timestamp: Date.now(),
         });
         await r.connect(serverUrl, token);
-        console.log("r.connect completed successfully! Room status:", r.state);
+        console.log("r.connect completed successfully! Room status:", r.state, "at", Date.now());
         setRoom(r);
         connectingRef.current = false;
 
