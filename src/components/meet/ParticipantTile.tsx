@@ -23,6 +23,8 @@ interface ParticipantTileProps {
   isVirtual?: boolean;
   pinned?: boolean;
   onPinToggle?: () => void;
+  tileWidth?: number;
+  tileHeight?: number;
 }
 
 export default function ParticipantTile({
@@ -33,6 +35,8 @@ export default function ParticipantTile({
   isVirtual = false,
   pinned = false,
   onPinToggle,
+  tileWidth,
+  tileHeight,
 }: ParticipantTileProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -41,6 +45,11 @@ export default function ParticipantTile({
   const [audioTrack, setAudioTrack] = useState<Track | null>(null);
   const [isAudioMuted, setIsAudioMuted] = useState(!participant.isMicrophoneEnabled);
   const [isVideoMuted, setIsVideoMuted] = useState(!participant.isCameraEnabled);
+
+  // Determine tile size mode for responsive styling
+  const isCompact = (tileWidth && tileWidth < 180) || (tileHeight && tileHeight < 140);
+  const isMedium =
+    !isCompact && ((tileWidth && tileWidth < 280) || (tileHeight && tileHeight < 200));
 
   const raisedHands = useMeetingStore((state) => state.raisedHands);
   const isHandRaised = raisedHands.includes(participant.identity);
@@ -151,7 +160,7 @@ export default function ParticipantTile({
   // Signal indicator helper
   const renderConnectionQuality = () => {
     const quality = participant.connectionQuality;
-    const size = "w-4 h-4";
+    const size = isCompact ? "w-2.5 h-2.5" : isMedium ? "w-3 h-3" : "w-4 h-4";
     if (quality === "excellent" || quality === "good") {
       return <SignalHigh className={`${size} text-green-500`} />;
     }
@@ -185,14 +194,14 @@ export default function ParticipantTile({
           <img
             src={getAvatarUrl(participant.name, participant.identity)}
             alt={participant.name || participant.identity || "Participant"}
-            className="w-20 h-20 rounded-full"
+            className={`${isCompact ? "w-8 h-8" : isMedium ? "w-12 h-12" : "w-20 h-20"} rounded-full`}
           />
-          {isVirtual && (
+          {isVirtual && !isCompact && (
             <span className="text-[10px] text-md-on-surface-variant mt-2">
               (Stream virtualized)
             </span>
           )}
-          {!isVirtual && !videoMuted && isLocal && (
+          {!isVirtual && !videoMuted && isLocal && !isCompact && (
             <span className="mt-3 inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-bold text-md-on-surface-variant animate-fade-in">
               <span className="w-3 h-3 rounded-full border-2 border-md-primary/60 border-t-transparent animate-spin" />
               Starting camera...
@@ -205,30 +214,36 @@ export default function ParticipantTile({
       <audio ref={audioRef} autoPlay className="hidden" />
 
       {/* Top Indicators Overlay */}
-      <div className="absolute top-4 left-4 right-4 flex justify-between items-start pointer-events-none">
+      <div
+        className={`absolute ${isCompact ? "top-1.5 left-1.5 right-1.5" : isMedium ? "top-2 left-2 right-2" : "top-4 left-4 right-4"} flex justify-between items-start pointer-events-none`}
+      >
         {/* Name and identity */}
-        <div className="bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/5 flex items-center gap-2 pointer-events-auto">
-          <span className="text-xs font-semibold text-md-on-surface">
+        <div
+          className={`bg-black/60 backdrop-blur-md ${isCompact ? "px-1.5 py-0.5 rounded-md gap-1" : isMedium ? "px-2 py-1 rounded-lg gap-1.5" : "px-3 py-1.5 rounded-xl gap-2"} border border-white/5 flex items-center pointer-events-auto`}
+        >
+          <span
+            className={`${isCompact ? "text-[9px]" : isMedium ? "text-[10px]" : "text-xs"} font-semibold text-md-on-surface truncate ${isCompact ? "max-w-[60px]" : isMedium ? "max-w-[100px]" : ""}`}
+          >
             {participant.name || participant.identity}
-            {isLocal && (
+            {isLocal && !isCompact && (
               <span className="text-md-primary ml-1 text-[10px] font-bold uppercase">(You)</span>
             )}
           </span>
-          {renderConnectionQuality()}
+          {!isCompact && renderConnectionQuality()}
         </div>
 
         {/* Hand Raised and Pin overlay */}
-        <div className="flex gap-2 items-center pointer-events-auto">
+        <div className={`flex ${isCompact ? "gap-1" : "gap-2"} items-center pointer-events-auto`}>
           {pinned && (
             <button
               onClick={onPinToggle}
-              className="bg-md-primary text-md-on-primary p-1.5 rounded-lg flex items-center justify-center border border-md-primary-hover hover:bg-md-primary-hover transition-all cursor-pointer"
+              className={`bg-md-primary text-md-on-primary ${isCompact ? "p-0.5 rounded" : "p-1.5 rounded-lg"} flex items-center justify-center border border-md-primary-hover hover:bg-md-primary-hover transition-all cursor-pointer`}
               title="Unpin Participant"
             >
-              <Pin className="w-3.5 h-3.5 transform rotate-45" />
+              <Pin className={`${isCompact ? "w-2 h-2" : "w-3.5 h-3.5"} transform rotate-45`} />
             </button>
           )}
-          {!pinned && onPinToggle && (
+          {!pinned && onPinToggle && !isCompact && (
             <button
               onClick={onPinToggle}
               className="bg-black/60 hover:bg-black/80 text-md-on-surface/70 hover:text-md-on-surface p-1.5 rounded-lg opacity-0 group-hover:opacity-100 flex items-center justify-center border border-white/5 transition-all cursor-pointer"
@@ -238,31 +253,43 @@ export default function ParticipantTile({
             </button>
           )}
           {isHandRaised && (
-            <div className="bg-md-primary text-md-on-primary p-1.5 rounded-lg flex items-center justify-center border border-md-primary-hover animate-scale-in">
-              <Hand className="w-3.5 h-3.5" />
+            <div
+              className={`bg-md-primary text-md-on-primary ${isCompact ? "p-0.5 rounded" : "p-1.5 rounded-lg"} flex items-center justify-center border border-md-primary-hover animate-scale-in`}
+            >
+              <Hand className={`${isCompact ? "w-2 h-2" : "w-3.5 h-3.5"}`} />
             </div>
           )}
         </div>
       </div>
 
       {/* Bottom status indicators */}
-      <div className="absolute bottom-4 right-4 flex items-center gap-2">
+      <div
+        className={`absolute ${isCompact ? "bottom-1.5 right-1.5 gap-1" : isMedium ? "bottom-2 right-2 gap-1.5" : "bottom-4 right-4 gap-2"} flex items-center`}
+      >
         <div
-          className={`p-2 rounded-full backdrop-blur-md border transition-colors duration-150 ${
+          className={`${isCompact ? "p-1 rounded" : isMedium ? "p-1.5 rounded-md" : "p-2 rounded-full"} backdrop-blur-md border transition-colors duration-150 ${
             audioMuted
               ? "bg-md-error-container border-md-error/40 text-md-on-error-container"
               : "bg-black/60 border-white/5 text-md-on-surface"
           }`}
         >
           {audioMuted ? (
-            <MicOff className="w-3.5 h-3.5 animate-pop-in" />
+            <MicOff
+              className={`${isCompact ? "w-2 h-2" : isMedium ? "w-2.5 h-2.5" : "w-3.5 h-3.5"} animate-pop-in`}
+            />
           ) : (
-            <Mic className="w-3.5 h-3.5 animate-pop-in" />
+            <Mic
+              className={`${isCompact ? "w-2 h-2" : isMedium ? "w-2.5 h-2.5" : "w-3.5 h-3.5"} animate-pop-in`}
+            />
           )}
         </div>
         {videoMuted && (
-          <div className="p-2 rounded-full backdrop-blur-md border bg-md-error-container border-md-error/40 text-md-on-error-container animate-pop-in">
-            <VideoOff className="w-3.5 h-3.5" />
+          <div
+            className={`${isCompact ? "p-1 rounded" : isMedium ? "p-1.5 rounded-md" : "p-2 rounded-full"} backdrop-blur-md border bg-md-error-container border-md-error/40 text-md-on-error-container animate-pop-in`}
+          >
+            <VideoOff
+              className={`${isCompact ? "w-2 h-2" : isMedium ? "w-2.5 h-2.5" : "w-3.5 h-3.5"}`}
+            />
           </div>
         )}
       </div>

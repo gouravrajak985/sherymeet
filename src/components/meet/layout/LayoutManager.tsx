@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Participant, RemoteParticipant } from 'livekit-client';
-import { useMeetingStore } from '@/store/useMeetingStore';
-import { calculateLayout } from './layoutEngine';
-import { LayoutParticipant, LayoutScreenShare, LayoutItem } from './types';
-import LayoutAnimator from './LayoutAnimator';
-import ParticipantTile from '../ParticipantTile';
-import ScreenShareTile from './ScreenShareTile';
+import React, { useState, useEffect, useRef, useMemo } from "react";
+import { Participant, RemoteParticipant } from "livekit-client";
+import { useMeetingStore } from "@/store/useMeetingStore";
+import { calculateLayout } from "./layoutEngine";
+import { LayoutParticipant, LayoutScreenShare, LayoutItem } from "./types";
+import LayoutAnimator from "./LayoutAnimator";
+import ParticipantTile from "../ParticipantTile";
+import ScreenShareTile from "./ScreenShareTile";
 
 interface LayoutManagerProps {
   localParticipant: Participant | null;
@@ -86,7 +86,7 @@ export const LayoutManager: React.FC<LayoutManagerProps> = ({
     // Local screen share
     if (localParticipant) {
       const localPub = Array.from(localParticipant.videoTrackPublications.values()).find(
-        (pub) => pub.source === 'screen_share' && pub.track
+        (pub) => pub.source === "screen_share" && pub.track,
       );
       if (localPub && localPub.track) {
         list.push({
@@ -100,7 +100,7 @@ export const LayoutManager: React.FC<LayoutManagerProps> = ({
     // Remote screen shares
     remoteParticipants.forEach((p) => {
       const remotePub = Array.from(p.videoTrackPublications.values()).find(
-        (pub) => pub.source === 'screen_share' && pub.track
+        (pub) => pub.source === "screen_share" && pub.track,
       );
       if (remotePub && remotePub.track) {
         list.push({
@@ -154,7 +154,7 @@ export const LayoutManager: React.FC<LayoutManagerProps> = ({
       let isVirtual = !isVisible;
 
       // Limit concurrent camera feeds to prevent browser overload
-      if (item.type === 'video') {
+      if (item.type === "video") {
         if (isVisible) {
           activeVideoCount++;
           if (activeVideoCount > maxActiveVideos) {
@@ -182,10 +182,10 @@ export const LayoutManager: React.FC<LayoutManagerProps> = ({
       className="w-full h-full relative overflow-hidden bg-md-surface/40 rounded-3xl min-h-[450px]"
     >
       {virtualizedItems.map((item) => {
-        if (item.type === 'screen') {
+        if (item.type === "screen") {
           // Render Screen Share Tile
           const share = mappedScreenShares.find((s) => s.id === item.id);
-          const presenter = getParticipant(share?.participantId || '');
+          const presenter = getParticipant(share?.participantId || "");
           if (!share || !share.track || !presenter) return null;
 
           return (
@@ -212,6 +212,8 @@ export const LayoutManager: React.FC<LayoutManagerProps> = ({
                 isVirtual={item.isVirtual}
                 pinned={pinnedParticipantIds.includes(participant.identity)}
                 onPinToggle={() => togglePinParticipant(participant.identity)}
+                tileWidth={item.width}
+                tileHeight={item.height}
               />
             </LayoutAnimator>
           );
